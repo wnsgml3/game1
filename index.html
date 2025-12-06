@@ -3,12 +3,18 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>오목 19×19</title>
+    <title>칠목 19×19</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="app">
-      <h1>오목 19×19</h1>
+    <div id="mainMenu" class="main-menu">
+      <h1 class="menu-title">아이템칠목</h1>
+      <button id="playBtn" class="btn play-btn">플레이</button>
+      <button id="infoBtn" class="btn">설명</button>
+    </div>
+    <div id="infoOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-label="게임 설명"></div>
+    <div class="app hidden">
+      <h1>칠목 19×19</h1>
       <div class="toolbar">
         <div class="status">
           <span class="stone stone-black"></span>
@@ -19,7 +25,11 @@
           <span id="timerText">00:00:00</span>
         </div>
       </div>
-      <div id="board" class="board" aria-label="오목 바둑판" role="grid"></div>
+      <div class="play-area">
+        <div id="aiCard" class="side-panel side-left" aria-label="AI 선택 카드"></div>
+        <div id="board" class="board" aria-label="칠목 바둑판" role="grid"></div>
+        <div id="humanCard" class="side-panel side-right" aria-label="플레이어 선택 카드"></div>
+      </div>
       <div id="winner" class="winner hidden"></div>
       <div id="cardsOverlay" class="overlay cards-overlay hidden" role="dialog" aria-modal="true" aria-label="카드 선택"></div>
     </div>

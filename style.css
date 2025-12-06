@@ -19,8 +19,55 @@ body {
 }
 
 .app {
-  width: min(100vw, var(--board-size) + 32px);
+  width: min(100vw, calc(var(--board-size) + 480px));
   padding: 16px;
+}
+
+.play-area {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.side-panel {
+  width: 180px;
+  height: var(--board-size);
+  display: grid;
+  place-items: start center;
+}
+
+.chosen-card {
+  width: 160px;
+  min-height: 60px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  display: grid;
+  place-items: center;
+  color: #333;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px;
+}
+
+.main-menu {
+  width: min(100vw, var(--board-size) + 32px);
+  padding: 32px 16px;
+  display: grid;
+  gap: 24px;
+  justify-items: center;
+}
+
+.menu-title {
+  margin: 0;
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.play-btn {
+  padding: 12px 20px;
+  font-size: 18px;
 }
 
 h1 {
@@ -81,6 +128,10 @@ h1 {
   box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
+.board.colorless .stone {
+  filter: grayscale(1) brightness(1.6);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(19, var(--cell));
@@ -108,6 +159,47 @@ h1 {
 .board .stone {
   position: absolute;
   transform: translate(-50%, -50%);
+}
+
+.marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 500;
+}
+
+.marker.defense {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #2bb48b;
+  border-radius: 50%;
+  background: rgba(43, 180, 139, 0.2);
+}
+
+.marker.obstacle {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: #b22;
+  font-weight: 800;
+}
+
+.marker.obstacle::before {
+  content: "X";
+}
+
+.marker.blocked {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  color: #b22;
+  font-weight: 800;
+}
+
+.marker.blocked::before {
+  content: "X";
 }
 
 .stone-black {
@@ -169,10 +261,25 @@ h1 {
   place-items: center;
   color: #333;
   font-weight: 600;
+  text-align: center;
+  padding: 12px;
 }
 
 .card:active {
   transform: translateY(1px);
+}
+.toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  z-index: 1200;
+  font-weight: 600;
 }
 .timer {
   margin-left: auto;
@@ -181,4 +288,42 @@ h1 {
   border-radius: 8px;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
+}
+
+.info-modal {
+  width: min(720px, 92vw);
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+  padding: 20px;
+  overflow: auto;
+}
+
+.info-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.info-content {
+  color: #333;
+  line-height: 1.6;
+}
+
+.info-content h3 {
+  margin: 16px 0 8px;
+  font-size: 18px;
+}
+
+.info-content ol {
+  padding-left: 18px;
+}
+
+.info-content li {
+  margin: 6px 0;
+}
+
+.info-close {
+  margin-top: 16px;
 }
