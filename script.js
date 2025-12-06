@@ -115,8 +115,16 @@ function updateStatus() {
 }
 
 function announceWinner(player) {
-  winnerEl.textContent = player === 1 ? "흑돌 승리" : "백돌 승리";
+  const msg = player === 1 ? "흑돌 승리" : "백돌 승리";
+  winnerEl.innerHTML = `
+    <div class="winner-content">
+      <div class="winner-text">${msg}</div>
+      <button id="newGameBtn" class="btn">새 게임</button>
+    </div>
+  `;
   winnerEl.classList.remove("hidden");
+  const btn = document.getElementById("newGameBtn");
+  if (btn) btn.addEventListener("click", reset);
 }
 
 function reset() {
@@ -124,6 +132,8 @@ function reset() {
   currentPlayer = 1;
   ended = false;
   winnerEl.classList.add("hidden");
+  humanCardEl.innerHTML = "";
+  aiCardEl.innerHTML = "";
   initBoard();
   updateStatus();
   stopTimer();

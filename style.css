@@ -224,7 +224,7 @@ h1 {
   letter-spacing: 1px;
   text-shadow: 0 4px 16px rgba(0,0,0,0.6);
   z-index: 1000;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .hidden {
@@ -326,4 +326,20 @@ h1 {
 
 .info-close {
   margin-top: 16px;
+}
+.winner-content {
+  background: #fff;
+  color: #222;
+  padding: 20px 24px;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+  display: grid;
+  gap: 12px;
+  min-width: 280px;
+  place-items: center;
+}
+
+.winner-text {
+  font-size: 28px;
+  font-weight: 800;
 }
