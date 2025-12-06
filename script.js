@@ -27,6 +27,8 @@ let aiFirstStoneR = -1;
 let aiFirstStoneC = -1;
 let blockedMarkersHuman = new Map();
 let blockedMarkersAI = new Map();
+let lastWinningCoords = [];
+let elapsedBeforePause = 0;
 
 const boardEl = document.getElementById("board");
 const statusTextEl = document.getElementById("statusText");
@@ -39,6 +41,7 @@ const humanCardEl = document.getElementById("humanCard");
 const aiCardEl = document.getElementById("aiCard");
 const infoBtn = document.getElementById("infoBtn");
 const infoOverlayEl = document.getElementById("infoOverlay");
+const menuBtn = document.getElementById("menuBtn");
 
 function initBoard() {
   const grid = document.createElement("div");
@@ -118,6 +121,7 @@ function announceWinner(player) {
   const msg = player === 1 ? "흑돌 승리" : "백돌 승리";
   winnerEl.innerHTML = `
     <div class="winner-content">
+      <button id="closeWinnerBtn" class="btn winner-close" aria-label="승리창 닫기">✕</button>
       <div class="winner-text">${msg}</div>
       <button id="newGameBtn" class="btn">새 게임</button>
     </div>
@@ -125,6 +129,13 @@ function announceWinner(player) {
   winnerEl.classList.remove("hidden");
   const btn = document.getElementById("newGameBtn");
   if (btn) btn.addEventListener("click", reset);
+  const btnClose = document.getElementById("closeWinnerBtn");
+  if (btnClose) btnClose.addEventListener("click", closeWinner);
+}
+
+function closeWinner() {
+  winnerEl.classList.add("hidden");
+  highlightWinningLine();
 }
 
 function reset() {
@@ -203,6 +214,7 @@ function handleClick(e) {
     startTimer();
   }
   if (checkWin(r, c, currentPlayer)) {
+    lastWinningCoords = getWinningCoords(r, c, currentPlayer);
     ended = true;
     announceWinner(currentPlayer);
     stopTimer();
@@ -237,6 +249,7 @@ document.addEventListener("keydown", (e) => {
     hideInfoOverlay();
   }
 });
+menuBtn.addEventListener("click", backToMenu);
 
 const timerTextEl = document.getElementById("timerText");
 const cardsOverlayEl = document.getElementById("cardsOverlay");
@@ -250,19 +263,40 @@ function setTimerDisplay(ms) {
   maybeShowCards(total);
 }
 
-function startTimer() {
-  timerStarted = true;
-  startTime = Date.now();
+function startTimerInterval() {
   timerId = setInterval(() => {
     const now = Date.now();
     setTimerDisplay(now - startTime);
   }, 250);
 }
 
+function startTimer() {
+  timerStarted = true;
+  startTime = Date.now();
+  elapsedBeforePause = 0;
+  startTimerInterval();
+}
+
 function stopTimer() {
   if (timerId) {
     clearInterval(timerId);
     timerId = null;
+  }
+}
+
+function pauseTimer() {
+  if (timerId) {
+    clearInterval(timerId);
+    timerId = null;
+    elapsedBeforePause = Date.now() - startTime;
+  }
+}
+
+function resumeTimer() {
+  if (!timerStarted || ended) return;
+  if (!timerId) {
+    startTime = Date.now() - elapsedBeforePause;
+    startTimerInterval();
   }
 }
 
@@ -294,11 +328,22 @@ function showCardsOverlay() {
   }
   cardsOverlayEl.appendChild(container);
   cardsOverlayEl.classList.remove("hidden");
+  pauseTimer();
 }
 
 function hideCardsOverlay() {
   cardsOverlayEl.classList.add("hidden");
   cardsOverlayEl.innerHTML = "";
+}
+
+function backToMenu() {
+  stopTimer();
+  hideCardsOverlay();
+  winnerEl.classList.add("hidden");
+  humanCardEl.innerHTML = "";
+  aiCardEl.innerHTML = "";
+  appEl.classList.add("hidden");
+  menuEl.classList.remove("hidden");
 }
 
 function showInfoOverlay() {
@@ -477,6 +522,7 @@ function onCardClick(e) {
   hideCardsOverlay();
   applyItemToPlayer(1, item);
   setChosenCard(1, item);
+  resumeTimer();
 }
 
 function applyItemToPlayer(player, item) {
@@ -712,6 +758,7 @@ function aiMove() {
     aiFirstStoneC = c;
   }
   if (checkWin(r, c, 2)) {
+    lastWinningCoords = getWinningCoords(r, c, 2);
     ended = true;
     announceWinner(2);
     stopTimer();
@@ -724,6 +771,7 @@ function aiMove() {
       const [r2, c2] = move2;
       placeStone(r2, c2, 2);
       if (checkWin(r2, c2, 2)) {
+        lastWinningCoords = getWinningCoords(r2, c2, 2);
         ended = true;
         announceWinner(2);
         stopTimer();
@@ -853,4 +901,50 @@ function clearBlockedMarkers(forAI) {
     if (el && el.parentNode) el.parentNode.removeChild(el);
   }
   map.clear();
+}
+function getWinningCoords(r, c, player) {
+  const dirs = [
+    [0, 1],
+    [1, 0],
+    [1, 1],
+    [1, -1],
+  ];
+  for (const [dr, dc] of dirs) {
+    const a = countDir(r, c, dr, dc, player);
+    const b = countDir(r, c, -dr, -dc, player);
+    const total = a + b + 1;
+    if (total >= WIN) {
+      let startR = r;
+      let startC = c;
+      for (let i = 0; i < b; i++) {
+        startR -= dr;
+        startC -= dc;
+      }
+      const posIndex = b;
+      let startIndex = Math.max(0, posIndex - (WIN - 1));
+      startIndex = Math.min(startIndex, total - WIN);
+      let rr = startR;
+      let cc = startC;
+      for (let i = 0; i < startIndex; i++) {
+        rr += dr;
+        cc += dc;
+      }
+      const coords = [];
+      for (let k = 0; k < WIN; k++) {
+        coords.push([rr, cc]);
+        rr += dr;
+        cc += dc;
+      }
+      return coords;
+    }
+  }
+  return [];
+}
+
+function highlightWinningLine() {
+  if (!lastWinningCoords || lastWinningCoords.length === 0) return;
+  for (const [rr, cc] of lastWinningCoords) {
+    const el = gridEl.querySelector(`.stone[data-r='${rr}'][data-c='${cc}']`);
+    if (el) el.classList.add("win");
+  }
 }
